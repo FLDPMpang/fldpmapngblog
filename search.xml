@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>全网中文最详细的在Linux上安装配置XilinxVivado及开发</title>
+      <link href="20210514174ea3a8/"/>
+      <url>20210514174ea3a8/</url>
+      
+        <content type="html"><![CDATA[<p>可能有人觉得有点标题党,但是我翻看一下全网还真没有把安装过程和原因写的特别清楚的<br>只重点些某些方面,而且大多都是在 CSDN 上,也不一定使用 markdown,阅读效果很不好.</p><p>最近我重新写了 ArchWiki 的<a href="https://wiki.archlinux.org/title/Xilinx_Vivado_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87">XilinxVivado</a>部分,那个写的比较正经.</p><p>废话不多说了</p><blockquote><p>测试平台为 Archlinux(内核版本 5.12) 桌面 Gnome40/i3wm</p></blockquote><h2 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h2><p>由于 vivado 安装程序需要登陆后提交个人信息才能下载，无法使用包管理安装(不过有些包管理器可以进行管理)</p><p>打开<a href="https://china.xilinx.com/support/download.html">官方下载中心</a>下载<code>Vivado Design Suite - HLx</code>相对应的版本</p><p>使用官方支持系统<code>CentOS</code>,<code>Ubuntu</code>,<code>OenpSUSE</code>,<code>Red Hat</code>相对应的版本,下载<code>Linux Self Extracting Web Installer</code>版本.</p><p>其他 Linux 发行版使用<code>All OS installer Single-File Download</code>版本(不建议使用不支持的 linux 安装)</p><h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="依赖"><a href="#依赖" class="headerlink" title="依赖"></a>依赖</h3><p>安装程序依赖 <code>ncurses5</code>库(不能使用 ncurses6),请使用相对应的包管理器安装(ubuntu 下包名为 <code>libncurses5</code>)</p><p>Vivado SDK 需要<code>gtk2</code>库, Vitis 需要安装<code>xorg-xlsclients</code> 库</p><p>arch 系发行版可以使用<a href="https://aur.archlinux.org/">AUR</a>中的<code>xilinx-vivado-dummy</code>进行替代安装所有这些依赖项</p><p>如果你使用平铺式窗口管理器 启动安装程序前加入环境变量</p><p>请使用<a href="https://wiki.archlinux.org/title/Xorg">Xorg</a>显示管理器,Vivado 使用的 Java 版本存在兼容性问题</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> _JAVA_AWT_WM_NONREPARENTING=1</span><br></pre></td></tr></table></figure><p>Vivado 中默认的字体显示效果差,难以阅读,请提前安装<code>noto-fonts</code>这套字体<br><a href="https://www.linuxfromscratch.org/blfs/view/7.10-systemd/kde/noto-fonts.html">官网下载地址</a><br>你的 Linux 软件仓库里应该也有</p><h3 id="安装主程序"><a href="#安装主程序" class="headerlink" title="安装主程序"></a>安装主程序</h3><p>在 安装包目录下 终端下启动安装程序(tar.gz 版需要先解压)</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ./xsetup</span><br></pre></td></tr></table></figure><p>随后就启动了熟悉的安装程序</p><p>同意协议,选择安装的内容,这些不必多说,<br>到选择安装位置时,建议选择<code>/opt/Xilinx</code>安装套件,本文假定套件装在那里</p><p>长时间的等待后,安装完成,Xilinx 许可证页面打开, <strong>懂的都懂</strong> ,导入<code>.lic</code>文件<br><img src="https://7.dusays.com/2021/05/14/a1f093e800f03.png" class="lazyload" data-srcset="https://7.dusays.com/2021/05/14/a1f093e800f03.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" alt="2021-05-14_12-14.png"></p><h3 id="驱动与额外安装"><a href="#驱动与额外安装" class="headerlink" title="驱动与额外安装"></a>驱动与额外安装</h3><h4 id="Digilent-USB-JTAG-驱动"><a href="#Digilent-USB-JTAG-驱动" class="headerlink" title="Digilent USB-JTAG 驱动"></a>Digilent USB-JTAG 驱动</h4><p>要使用来自 Vivado 的 Digilent Adept USB-JTAG 适配器(例如内置在 ZedBoard 上的 JTAG 适配器)<br>你需要安装 <a href="https://store.digilentinc.com/digilent-adept/">Digilent Adept Runtime</a></p><h4 id="Linux-cable-驱动"><a href="#Linux-cable-驱动" class="headerlink" title="Linux cable 驱动"></a>Linux cable 驱动</h4><p>以 root 权限在安装目录运行脚本：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(vivado_install_dir)/data/xicom/cable_drivers/lin64/install_script/install_drivers/install_drivers</span><br></pre></td></tr></table></figure><h2 id="用户配置"><a href="#用户配置" class="headerlink" title="用户配置"></a>用户配置</h2><h3 id="快捷方式配置"><a href="#快捷方式配置" class="headerlink" title="快捷方式配置"></a>快捷方式配置</h3><p>安装完成后,Vivado 会在 root 用户生成桌面和应用程序菜单快捷方式,但一直使用 root 用户并不安全<br>如果使用其他用户需要应用程序菜单中的快捷方式，则必须将它们从 root 帐户移动到/usr/share<br>桌面快捷方式应该移动到用户桌面</p><p>复制应用程序菜单快捷方式:</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo mv /root/.<span class="built_in">local</span>/share/applications/* /usr/share/applications/</span><br><span class="line">sudo mv /root/.<span class="built_in">local</span>/share/desktop-directories/* /usr/share/desktop-directories/</span><br><span class="line">sudo mv /root/.config/menus/applications-merged/* /etc/xdg/menus/applications-merged/</span><br></pre></td></tr></table></figure><p><img src="https://7.dusays.com/2021/05/14/4a8d94570a644.png" class="lazyload" data-srcset="https://7.dusays.com/2021/05/14/4a8d94570a644.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" alt="1620966734901.png"></p><p>复制桌面快捷方式:</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo chown (username) /root/Desktop/*</span><br><span class="line">sudo mv /root/Desktop/* /home/(username)/Desktop/</span><br></pre></td></tr></table></figure><h3 id="串口设置"><a href="#串口设置" class="headerlink" title="串口设置"></a>串口设置</h3><p>若要使用串口 需要将用户添加到<code>uucp</code>组中</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo gpasswd -a (username) uucp</span><br></pre></td></tr></table></figure><p>在 Linux(windonws 下也可用)我推荐使用的串口调试工具是<a href="https://www.vofa.plus/">VOFA+</a><br>会自动检测串口(而且不止串口通信,功能非常多,还可以安装插件)</p><p>当然命令行下还是使用<code>picocom</code>吧</p><p><img src="https://7.dusays.com/2021/05/14/6bddccfc18749.png" class="lazyload" data-srcset="https://7.dusays.com/2021/05/14/6bddccfc18749.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" alt="1620967276163.png"></p><h3 id="启动屏幕缩放"><a href="#启动屏幕缩放" class="headerlink" title="启动屏幕缩放"></a>启动屏幕缩放</h3><p>启动 Vivado，然后按照<code>Tools -&gt; Setting -&gt; Display -&gt; Scaling</code>方式启用屏幕缩放功能</p><p>这样大概就可以正常开发使用了,有问题可评论区留言</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 电子电路设计 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> FPGA </tag>
+            
+            <tag> Vivado </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>archlinux系统安装</title>
       <link href="20210322a4632fd3/"/>
       <url>20210322a4632fd3/</url>
@@ -69,7 +96,7 @@
       
       <categories>
           
-          <category> 硬件工程 </category>
+          <category> 电子电路设计 </category>
           
       </categories>
       
